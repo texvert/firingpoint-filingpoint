@@ -218,3 +218,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Filingpoint ---
+# Real databases must never be committed (they hold user data)
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+# Local data directory (Docker volume mount)
+data/
