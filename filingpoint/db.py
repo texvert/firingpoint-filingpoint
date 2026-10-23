@@ -3,6 +3,7 @@ from pathlib import Path
 
 import click
 from flask import current_app, g
+from flask.cli import with_appcontext
 
 MIGRATIONS_DIR = Path(__file__).resolve().parent.parent / "migrations"
 
@@ -33,6 +34,7 @@ def migrate(db):
 
 
 @click.command("migrate")
+@with_appcontext
 def migrate_command():
     migrate(get_db())
     click.echo("Database is up to date.")
