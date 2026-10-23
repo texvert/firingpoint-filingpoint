@@ -9,6 +9,8 @@ def create_app():
     app = Flask(__name__, instance_relative_config=True)
     load_config(app)
     os.makedirs(app.instance_path, exist_ok=True)
+    from . import db
+    db.init_app(app)
 
     @app.route("/")
     def index():
