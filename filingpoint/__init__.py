@@ -12,8 +12,9 @@ def create_app(test_config=None):
         app.config.update(test_config)
     os.makedirs(app.instance_path, exist_ok=True)
 
-    from . import db
+    from . import admin_cli, db
     db.init_app(app)
+    admin_cli.init_app(app)
 
     @app.route("/")
     def index():
