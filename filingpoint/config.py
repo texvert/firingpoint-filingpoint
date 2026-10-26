@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 MIN_SECRET_KEY_LENGTH = 32
 
@@ -21,6 +22,10 @@ def load_config(app):
     app.config.from_mapping(
         FILINGPOINT_ENV=env,
         SECRET_KEY=secret_key or "dev",
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=(env == "production"),
+        PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
         DATABASE=os.environ.get(
             "FILINGPOINT_DATABASE",
             os.path.join(app.instance_path, "filingpoint.db"),

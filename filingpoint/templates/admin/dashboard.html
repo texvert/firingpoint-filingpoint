@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Admin · Filingpoint{% endblock %}
+{% block content %}
+  <h1>Admin</h1>
+  <p>Logged in as {{ g.admin["username"] }}.</p>
+  <form method="post" action="{{ url_for('admin.logout') }}">
+    {{ logout_form.hidden_tag() }}
+    <button type="submit">Log out</button>
+  </form>
+{% endblock %}

@@ -1,8 +1,11 @@
 import os
 
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect
 
 from .config import load_config
+
+csrf = CSRFProtect()
 
 
 def create_app(test_config=None):
@@ -12,9 +15,13 @@ def create_app(test_config=None):
         app.config.update(test_config)
     os.makedirs(app.instance_path, exist_ok=True)
 
-    from . import admin_cli, db
+    csrf.init_app(app)
+
+    from . import admin, admin_cli, auth, db
     db.init_app(app)
     admin_cli.init_app(app)
+    auth.init_app(app)
+    app.register_blueprint(admin.bp)
 
     @app.route("/")
     def index():

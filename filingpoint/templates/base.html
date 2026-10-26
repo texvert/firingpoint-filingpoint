@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Filingpoint{% endblock %}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 32rem; margin: 0 auto; padding: 1rem; line-height: 1.5; }
+    label { display: block; margin-top: 1rem; }
+    input { width: 100%; padding: 0.6rem; font-size: 1rem; box-sizing: border-box; }
+    button { margin-top: 1.25rem; padding: 0.6rem 1.2rem; font-size: 1rem; }
+    .error { color: #a00; }
+  </style>
+</head>
+<body>
+  {% block content %}{% endblock %}
+</body>
+</html>
