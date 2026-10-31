@@ -1,10 +1,9 @@
 from flask import Blueprint, g, redirect, render_template, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .auth import admin_required, log_in, log_out
+from .auth import admin_required, log_in, log_out, temporary_password_expired
 from .db import get_db
-from .forms import LoginForm, LogoutForm
-from .timestamps import from_text, utc_now
+from .forms import ChangePasswordForm, LoginForm, LogoutForm, NewPasswordForm
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -13,12 +12,6 @@ bp = Blueprint("admin", __name__, url_prefix="/admin")
 DUMMY_PASSWORD_HASH = generate_password_hash("not-a-real-password")
 
 GENERIC_LOGIN_ERROR = "Incorrect username or password."
-
-
-def temporary_password_expired(admin):
-    if not admin["must_change_password"] or admin["temp_password_expires_at"] is None:
-        return False
-    return from_text(admin["temp_password_expires_at"]) < utc_now()
 
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -51,6 +44,39 @@ def logout():
         log_out()
     return redirect(url_for("admin.login"))
 
+
+@bp.route("/change-password", methods=["GET", "POST"])
+@admin_required
+def change_password():
+    forced = bool(g.admin["must_change_password"])
+    # A forced change follows a temporary-password login moments earlier, so we
+    # don't ask for that password again. A voluntary change asks for the current one.
+    form = NewPasswordForm() if forced else ChangePasswordForm()
+    error = None
+    if form.validate_on_submit():
+        if not forced and not check_password_hash(
+            g.admin["password_hash"], form.current_password.data
+        ):
+            error = "Your current password is incorrect."
+        elif check_password_hash(g.admin["password_hash"], form.new_password.data):
+            error = "Choose a password different from your current one."
+        else:
+            db = get_db()
+            db.execute(
+                "UPDATE admins SET password_hash = ?, must_change_password = 0, "
+                "temp_password_expires_at = NULL WHERE id = ?",
+                (generate_password_hash(form.new_password.data), g.admin["id"]),
+            )
+            db.commit()
+            log_in("admin", g.admin["id"])
+            return redirect(url_for("admin.dashboard"))
+    return render_template(
+        "admin/change_password.html",
+        form=form,
+        error=error,
+        forced=forced,
+        logout_form=LogoutForm(),
+    )
 
 @bp.route("/")
 @admin_required
